@@ -19,7 +19,7 @@ interface Libro {
     disponible: boolean;
 };
 type CreateLibroType = Omit<Libro, 'id'>;
-type UpdateLibroType = Partial<CreateLibroType>;
+type UpdateLibroType = Partial<Libro>;
 
 // Modelos de conexiones con la Tabla 'libro'
 export const LibroModel = {
@@ -32,13 +32,13 @@ export const LibroModel = {
         return result.rows[0] || null;
     },
     createLibro: async (dato: CreateLibroType): Promise<boolean> => {
-        const { titulo, autor, categoria, stock, disponible } = dato;
+        const { titulo, autor, categoria, stock } = dato;
         const query =
-            "INSERT INTO libro (titulo, autor, categoria, stock , disponible) VALUES ($1,$2,$3, $4, $5) RETURNING *;";
-        const { rowCount } = await pool.query(query, [titulo, autor, categoria, stock, disponible]);
+            "INSERT INTO libro (titulo, autor, categoria, stock) VALUES ($1,$2,$3, $4) RETURNING *;";
+        const { rowCount } = await pool.query(query, [titulo, autor, categoria, stock]);
         return rowCount ? true : false;
     },
-    updateLibroId: async (id: number, dato: CreateLibroType): Promise<UpdateLibroType | null> => {
+    updateLibroId: async (id: number, dato: UpdateLibroType): Promise<UpdateLibroType | null> => {
         const { titulo, autor, categoria, stock, disponible } = dato;
         const query = `UPDATE libro
             SET 

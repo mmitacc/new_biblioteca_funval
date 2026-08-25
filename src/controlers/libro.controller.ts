@@ -36,8 +36,8 @@ export const getLibroId = async (req: Request, res: Response) => {
 
 export const postLibro = async (req: Request, res: Response) => {
     try {
-        const { titulo, autor, categoria, stock, disponible } = req.body;
-        if (!titulo || !autor || !categoria || !stock || !disponible) {
+        const { titulo, autor, categoria, stock } = req.body;
+        if (!titulo || !autor || !categoria || !stock) {
             res.status(400).json({ error: "faltan datos obligatorios" });
         }
         const result = await LibroModel.createLibro(req.body);
@@ -58,7 +58,10 @@ export const putLibroId = async (req: Request, res: Response) => {
             res.status(400).json({ error: "EL ID DEBE SER UN VALOR NUMERICO" });
         }
         const { titulo, autor, categoria, stock, disponible } = req.body;
-        if (!titulo || !autor || !categoria || !stock || !disponible) {
+        if (!titulo || !autor || !categoria || !stock) {
+            res.status(400).json({ error: "faltan datos obligatorios" });
+        }
+        if (!['true', 'false'].includes(String(disponible).toLowerCase())) {
             res.status(400).json({ error: "faltan datos obligatorios" });
         }
         const result = await LibroModel.updateLibroId(id, req.body);
