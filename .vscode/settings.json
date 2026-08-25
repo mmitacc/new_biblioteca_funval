@@ -1,0 +1,24 @@
+{
+  "sqltools.connections": [
+    {
+      "ssh": "Disabled",
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5432,
+      "driver": "PostgreSQL",
+      "name": "exampleDB",
+      "database": "juegos",
+      "username": "Harold"
+    },
+    {
+      "ssh": "Disabled",
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5432,
+      "driver": "PostgreSQL",
+      "username": "postgres",
+      "name": "biblioteca_db",
+      "database": "biblioteca_db"
+    }
+  ]
+}
