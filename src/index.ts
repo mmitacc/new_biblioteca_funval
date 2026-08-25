@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 import { pool } from "./config/db.js";
 import type { Request, Response } from "express";
 import libroRouter from './routers/libro.router.js';
+import socioRouter from './routers/socios_route.js';
+import prestamoRouter from './routers/prestamos.routes.js';
 
 dotenv.config();
 const app = expres();
@@ -15,6 +17,12 @@ app.use(expres.json());
 
 // Rutas para la tabla 'libro'
 app.use('/libro', libroRouter);
+
+// Rutas para la tabla 'socio'
+app.use('/socio', socioRouter);
+
+// Rutas para la tabla 'prestamo'
+app.use('/prestamo', prestamoRouter);
 
 app.get("/", function (req: Request, res: Response) {
   res.json({
