@@ -49,7 +49,8 @@ app.listen(PORT, async function () {
   try {
     const res = await pool.query("SELECT NOW()");
     console.log(
-      `CONECTADO A POSTGRESQL CON EXITO HORA DEL SERVIDOR ${res.rows[0].now}`,
+      `CONECTADO A POSTGRESQL CON EXITO!
+Hora del Servidor ${res.rows[0].now}`,
     );
   } catch (error) {
     console.log("ERROR EN LA CONEXION");
