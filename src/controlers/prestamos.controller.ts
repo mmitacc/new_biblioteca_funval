@@ -83,7 +83,7 @@ export async function putPrestamo(req: Request, res: Response) {
     if (isNaN(id)) {
       res.status(400).json({ error: "EL ID DEBE SER UN VALOR NUMERICO" });
     }
-    const prestamoUpdate = await PrestamoModel.update(id, req.body);
+    const prestamoUpdate = await PrestamoModel.update(id, { devuelto: true });
     if (!prestamoUpdate) {
       res.status(404).json({ error: "prestamo no encontrado" });
       return;

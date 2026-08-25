@@ -59,11 +59,11 @@ export const PrestamoModel = {
   ): Promise<Prestamo | null> => {
     const { rows } = await pool.query(
       `UPDATE prestamo
-       SET fecha_devolucion = $1,
-           devuelto = $2
-           WHERE id_prestamo = $3
+       SET fecha_devolucion = CURRENT_DATE,
+           devuelto = $1
+           WHERE id_prestamo = $2
            RETURNING *;`,
-      [dato.fecha_devolucion || null, dato.devuelto, id],
+      [dato.devuelto, id],
     );
 
     return rows[0] || null;
