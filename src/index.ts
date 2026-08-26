@@ -38,6 +38,10 @@ app.use('/socio', socioRouter);
 app.use('/prestamo', prestamoRouter);
 
 app.get("/", function (req: Request, res: Response) {
+  /*  
+  #swagger.tags = ['Test']
+  #swagger.summary = 'Valida la conexion del servidor'
+  */
   res.json({
     message: "servidor corriendo exitosamente",
   });

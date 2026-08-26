@@ -2,6 +2,10 @@ import type { Request, Response } from "express";
 import LibroModel from "../models/libro.model.js";
 
 export const getLibrosAll = async (req: Request, res: Response) => {
+    /*  
+    #swagger.tags = ['Libro']
+    #swagger.summary = 'Obtener y filtrar todos los Libros de la biblioteca'
+    */
     try {
         const result = await LibroModel.findAll();
         res.json({
@@ -18,6 +22,10 @@ export const getLibrosAll = async (req: Request, res: Response) => {
 };
 
 export const getLibroId = async (req: Request, res: Response) => {
+    /*  
+    #swagger.tags = ['Libro']
+    #swagger.summary = 'Obtener y filtrar un Libros de la biblioteca por su ID'
+    */
     try {
         const id = Number(req.params.id);
         if (isNaN(id)) {
@@ -35,6 +43,10 @@ export const getLibroId = async (req: Request, res: Response) => {
 };
 
 export const postLibro = async (req: Request, res: Response) => {
+    /*  
+    #swagger.tags = ['Libro']
+    #swagger.summary = 'Crea un nuevo Libro de la biblioteca'
+    */    
     try {
         const { titulo, autor, categoria, stock, disponible } = req.body;
         if (!titulo || !autor || !categoria || !stock || !disponible) {
@@ -52,6 +64,10 @@ export const postLibro = async (req: Request, res: Response) => {
 };
 
 export const putLibroId = async (req: Request, res: Response) => {
+    /*  
+    #swagger.tags = ['Libro']
+    #swagger.summary = 'Modificar/actualizar un Libro de la biblioteca por su ID'
+    */    
     try {
         const id = Number(req.params.id);
         if (isNaN(id)) {
@@ -72,6 +88,10 @@ export const putLibroId = async (req: Request, res: Response) => {
 };
 
 export const deleteLibroId = async (req: Request, res: Response) => {
+    /*  
+    #swagger.tags = ['Libro']
+    #swagger.summary = 'Elimina un registro de un Libro de la biblioteca por su ID'
+    */    
     try {
         const id = Number(req.params.id);
         if (isNaN(id)) {
