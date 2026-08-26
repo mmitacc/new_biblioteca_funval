@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import {socioModel} from "../models/socios.models.js"
+import {newsocioschema, updatesocioschema} from "../schemas/socios.schemas.js"
 
 
 export const getsocios = async(req:Request, res:Response) => {
@@ -44,12 +45,11 @@ export const newsocio = async(req:Request, res: Response) => {
     #swagger.summary = 'Crea un nuevo Socio de la biblioteca'
     */
       try {
-    const { nombre, dni, email, suscripto } = req.body;
-    console.log(`${nombre},${dni},${email},${suscripto}`)
-    if (!nombre || !dni || !email || suscripto === undefined) {
-      return res.status(400).json({ error: "todos los campos son obligatorios" });
+        const result = await newsocioschema.safeParse(req.body)
+    if (!result.success) {
+      return res.status(400).json({ error: result.error.issues });
     }
-    const resultado = await socioModel.createsocio({nombre, dni, email, suscripto});
+    const resultado = await socioModel.createsocio(result.data);
     res.status(201).json(resultado);
   } catch (error:any) {
     res.status(500).json({ error: "sucedio un error al crear al socio" });
@@ -88,6 +88,10 @@ export const updatesocio = async(req:Request, res:Response) => {
     const socio = await socioModel.findsocio(id_socio)
         if (!socio) {
       return res.json({ message: "no se encotro a ningun socio con ese ID" });
+    }
+    const result = await updatesocioschema.safeParse(req.body)
+    if(!result.success){
+      return res.status(400).json({ error: result.error.issues });
     }
     const resultado = await socioModel.updatesocio(id_socio, req.body);
     if(!resultado){
