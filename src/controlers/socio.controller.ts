@@ -1,30 +1,26 @@
-import { pool } from "../config/db.js";
 import type { Request, Response } from "express";
+import {socioModel} from "../models/socios.models.js"
 
 
 export const getsocios = async(req:Request, res:Response) => {
+/* 
+#swagger.tags = ['Socios']
+
+*/ 
     try {
-    const { suscripto } = req.query;
-    let consulta = "SELECT * FROM socio";
-    let params: any[] = [];
-    let donde = false;
-    if (suscripto === "true") {
-      consulta += " WHERE suscripto = $1";
-      params.push(true);
-      donde = true;
-    } else if (suscripto === "false") {
-      consulta += " WHERE suscripto = $1";
-      params.push(false);
-      donde = true;
-    }
-    const resultado = await pool.query(consulta, params);
-    res.json({ lista: resultado.rowCount, datos: resultado.rows });
+      const {suscripto} = req.query
+      const socios = await socioModel.findAll(suscripto as string)
+      res.json({ lista: socios.length, data: socios})
   } catch (error) {
     res.status(500).json({ error: "hubo un error al trar la tabla socio" });
   }
 }
 
 export const getsociobyid = async(req:Request, res: Response) => {
+/* 
+#swagger.tags = ['Socios']
+
+*/
     try {
     const id_socio = Number(req.params.id);
     if (isNaN(id_socio)) {
@@ -32,37 +28,56 @@ export const getsociobyid = async(req:Request, res: Response) => {
         .status(400)
         .json({ error: "el ID tiene que ser un numero valido" });
     }
-    const resultado = await pool.query("SELECT * FROM socio WHERE id_socio = $1", [
-      id_socio,
-    ]);
-    if (resultado.rows.length === 0) {
-      return res
-        .status(404)
-        .json({ error: "no se encontro a un socio con el id ingresado" });
+    const resultado = await socioModel.findsocio(id_socio);
+    if(!resultado){
+      return res.status(404).json({error:"no existe un socio con ese id"})
     }
-    res.json(resultado.rows[0]);
+    res.json(resultado)
   } catch (error) {
     res.status(500).json({ error: "algo salio mal" });
   }
 }
 
 export const newsocio = async(req:Request, res: Response) => {
+/* 
+#swagger.tags = ['Socios']
+
+*/
       try {
     const { nombre, dni, email, suscripto } = req.body;
     console.log(`${nombre},${dni},${email},${suscripto}`)
     if (!nombre || !dni || !email || suscripto === undefined) {
       return res.status(400).json({ error: "todos los campos son obligatorios" });
     }
-    const query =
-      "INSERT INTO socio (nombre, dni, email, suscripto) VALUES ($1, $2, $3, $4) RETURNING * ";
-    const resultado = await pool.query(query, [nombre, dni, email, suscripto]);
-    res.status(201).json(resultado.rows[0]);
+    const resultado = await socioModel.createsocio({nombre, dni, email, suscripto});
+    res.status(201).json(resultado);
   } catch (error:any) {
-    res.status(500).json({ error: "sucedio un error" });
+    res.status(500).json({ error: "sucedio un error al crear al socio" });
   }
 }
 
 export const updatesocio = async(req:Request, res:Response) => {
+/* 
+#swagger.tags = ['Socios']
+#swagger.summary = 'Actualizar un socio (parcial)'
+#swagger.parameters['id'] = {
+in: 'path',
+description: 'ID del socio a actualizar',
+required: true,
+type: 'integer'
+}
+#swagger.parameters['body'] = {
+in: 'body',
+description: 'Datos a actualizar (campos opcionales)',
+required: false,
+schema: {
+nombre: 'Juan Pérez',
+dni: '12345678',
+email: 'juan@ejemplo.com',
+suscripto: true
+}
+}
+*/
       try {
     const id_socio = Number(req.params.id);
     if (isNaN(id_socio)) {
@@ -70,50 +85,15 @@ export const updatesocio = async(req:Request, res:Response) => {
         .status(400)
         .json({ error: "el Id deber ser un nuemro valido" });
     }
-    
-    const socio = await pool.query("SELECT * FROM socio WHERE id_socio = $1", [
-      id_socio,
-    ]);
-        if (socio.rows.length === 0) {
+    const socio = await socioModel.findsocio(id_socio)
+        if (!socio) {
       return res.json({ message: "no se encotro a ningun socio con ese ID" });
     }
-        const { nombre, dni, email, suscripto } = req.body;
-        let query = "UPDATE socio SET ";
-        const params:any = []
-        let actulizar_num = 0
-        let indexnum = 1
-    if(nombre !== undefined){
-        query += `nombre = $${indexnum++}, `
-        params.push(nombre)
-        actulizar_num++ 
+    const resultado = await socioModel.updatesocio(id_socio, req.body);
+    if(!resultado){
+      return res.status(400).json({error:"necesita actulizar almenos un elemento"})
     }
-    if(dni !== undefined){
-        query += `dni = $${indexnum++}, `
-        params.push(dni)
-        actulizar_num++
-
-    }
-    if(email !== undefined){
-        query += `email = $${indexnum++}, `
-        params.push(email)
-        actulizar_num++
-    }
-    if(suscripto !== undefined){
-        query += `suscripto = $${indexnum++}, `
-        params.push(suscripto)
-        actulizar_num++
-    }
-    if(actulizar_num === 0){
-        return res.status(400).json({error: "tiene que actulizar almentos un campo "})
-    }
-
-    query = query.slice(0, -2)
-
-    query += ` WHERE id_socio = $${indexnum} RETURNING * `
-    params.push(id_socio)
-
-    const resultado = await pool.query(query, params);
-    res.status(202).json(resultado.rows[0]);
+    res.status(202).json(resultado);
   } catch (error:any) {
     console.error("error", error.message)
     res.status(500).json({ error: "hubo un error al actulizar el usuario" });
@@ -121,6 +101,10 @@ export const updatesocio = async(req:Request, res:Response) => {
 }
 
 export const deletesocio = async(req:Request, res:Response) => {
+/* 
+#swagger.tags = ['Socios']
+
+*/
       try {
     const id_socio = Number(req.params.id);
     if (isNaN(id_socio)) {
@@ -128,9 +112,10 @@ export const deletesocio = async(req:Request, res:Response) => {
         .status(400)
         .json({ error: "el id del socio tiene que ser un numero valido" });
     }
-    const resultado = await pool.query("DELETE FROM socio WHERE id_socio = $1", [
-      id_socio,
-    ]);
+    const resultado = await await socioModel.deletesocio(id_socio);
+    if(!resultado){
+      return res.status(404).json({error:"no se encontro al socio a eliminar"})
+    }
     res.json({message: "se elimino con exito al socio"});
   } catch (error) {
     res.status(400).json({ error: "hubo un erro al eliminar al usuario" });
