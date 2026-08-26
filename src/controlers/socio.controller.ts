@@ -3,10 +3,10 @@ import {socioModel} from "../models/socios.models.js"
 
 
 export const getsocios = async(req:Request, res:Response) => {
-/* 
-#swagger.tags = ['Socios']
-
-*/ 
+    /* 
+    #swagger.tags = ['Socios']
+    #swagger.summary = 'Obtener y filtrar todos los Socios de la biblioteca'
+    */ 
     try {
       const {suscripto} = req.query
       const socios = await socioModel.findAll(suscripto as string)
@@ -17,10 +17,10 @@ export const getsocios = async(req:Request, res:Response) => {
 }
 
 export const getsociobyid = async(req:Request, res: Response) => {
-/* 
-#swagger.tags = ['Socios']
-
-*/
+    /* 
+    #swagger.tags = ['Socios']
+    #swagger.summary = 'Obtener y filtrar un Socio de la biblioteca por su ID'
+    */
     try {
     const id_socio = Number(req.params.id);
     if (isNaN(id_socio)) {
@@ -39,10 +39,10 @@ export const getsociobyid = async(req:Request, res: Response) => {
 }
 
 export const newsocio = async(req:Request, res: Response) => {
-/* 
-#swagger.tags = ['Socios']
-
-*/
+    /* 
+    #swagger.tags = ['Socios']
+    #swagger.summary = 'Crea un nuevo Socio de la biblioteca'
+    */
       try {
     const { nombre, dni, email, suscripto } = req.body;
     console.log(`${nombre},${dni},${email},${suscripto}`)
@@ -57,28 +57,28 @@ export const newsocio = async(req:Request, res: Response) => {
 }
 
 export const updatesocio = async(req:Request, res:Response) => {
-/* 
-#swagger.tags = ['Socios']
-#swagger.summary = 'Actualizar un socio (parcial)'
-#swagger.parameters['id'] = {
-in: 'path',
-description: 'ID del socio a actualizar',
-required: true,
-type: 'integer'
-}
-#swagger.parameters['body'] = {
-in: 'body',
-description: 'Datos a actualizar (campos opcionales)',
-required: false,
-schema: {
-nombre: 'Juan Pérez',
-dni: '12345678',
-email: 'juan@ejemplo.com',
-suscripto: true
-}
-}
-*/
-      try {
+    /* 
+    #swagger.tags = ['Socios']
+    #swagger.summary = 'Actualizar un socio (parcial)'
+    #swagger.parameters['id'] = {
+    in: 'path',
+    description: 'ID del socio a actualizar',
+    required: true,
+    type: 'integer'
+    }
+    #swagger.parameters['body'] = {
+    in: 'body',
+    description: 'Datos a actualizar (campos opcionales)',
+    required: false,
+    schema: {
+    nombre: 'Juan Pérez',
+    dni: '12345678',
+    email: 'juan@ejemplo.com',
+    suscripto: true
+    }
+    }
+    */
+    try {
     const id_socio = Number(req.params.id);
     if (isNaN(id_socio)) {
       return res
@@ -101,10 +101,10 @@ suscripto: true
 }
 
 export const deletesocio = async(req:Request, res:Response) => {
-/* 
-#swagger.tags = ['Socios']
-
-*/
+    /* 
+    #swagger.tags = ['Socios']
+    #swagger.summary = 'Elimina un Socio de la biblioteca por su ID'
+    */
       try {
     const id_socio = Number(req.params.id);
     if (isNaN(id_socio)) {

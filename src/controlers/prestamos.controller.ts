@@ -2,8 +2,11 @@ import type { Request, Response } from "express";
 import { PrestamoModel } from "../models/prestamos.model.js";
 
 //get para ver toda la lista
-
 export async function getPrestamos(req: Request, res: Response) {
+  /*  
+  #swagger.tags = ['Prestamo']
+  #swagger.summary = 'Obtener y filtrar todos los registros de Prestamos de la biblioteca'
+  */  
   try {
     const prestamos = await PrestamoModel.findAll();
     res.json({ totalPrestamos: prestamos.length, data: prestamos });
@@ -16,8 +19,11 @@ export async function getPrestamos(req: Request, res: Response) {
 }
 
 // get para filtrar por true o false
-
 export async function getPrestamosByDevuelto(req: Request, res: Response) {
+  /*  
+  #swagger.tags = ['Prestamo']
+  #swagger.summary = 'Obtener y filtrar los registros de Prestamos DEVUELTOS de la biblioteca'
+  */    
   try {
     const { devuelto } = req.query;
     if (devuelto !== "true" && devuelto !== "false") {
@@ -37,6 +43,10 @@ export async function getPrestamosByDevuelto(req: Request, res: Response) {
 
 //GET PARA VER UN PRESTAMOS POR SU ID
 export async function getPrestamosById(req: Request, res: Response) {
+  /*  
+  #swagger.tags = ['Prestamo']
+  #swagger.summary = 'Obtener y filtrar un registro de Prestamo de la biblioteca por su ID'
+  */    
   try {
     const id = Number(req.params.id);
     if (isNaN(id)) {
@@ -56,6 +66,10 @@ export async function getPrestamosById(req: Request, res: Response) {
 
 //POST PARA CREAR UN PRESTAMO
 export async function postPrestamo(req: Request, res: Response) {
+  /*  
+  #swagger.tags = ['Prestamo']
+  #swagger.summary = 'Crear un nuevo registro de Prestamo de la biblioteca'
+  */    
   try {
     const { fecha_prestamo, fecha_devolucion, devuelto, id_socio, id_libro } =
       req.body;
@@ -76,8 +90,11 @@ export async function postPrestamo(req: Request, res: Response) {
 }
 
 //put para actualizar
-
 export async function putPrestamo(req: Request, res: Response) {
+  /*  
+  #swagger.tags = ['Prestamo']
+  #swagger.summary = 'Actualizar un registro de Prestamo de la biblioteca por su ID'
+  */    
   try {
     const id = Number(req.params.id);
     if (isNaN(id)) {
@@ -95,8 +112,11 @@ export async function putPrestamo(req: Request, res: Response) {
 }
 
 // delete para eliminar
-
 export async function deletePrestamo(req: Request, res: Response) {
+  /*  
+  #swagger.tags = ['Prestamo']
+  #swagger.summary = 'Eliminar un registro de Prestamo de la biblioteca por su ID'
+  */    
   try {
     const id = Number(req.params.id);
     if (isNaN(id)) {
