@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   getPrestamos,
+  getPrestamosByDevuelto,
   getPrestamosById,
   postPrestamo,
   putPrestamo,
@@ -9,6 +10,7 @@ import {
 
 const router = Router();
 router.get("/", getPrestamos);
+router.get("/devuelto", getPrestamosByDevuelto);
 router.get("/:id", getPrestamosById);
 router.post("/", postPrestamo);
 router.put("/:id", putPrestamo);

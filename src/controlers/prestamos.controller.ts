@@ -1,53 +1,37 @@
-import { pool } from "../config/db.js";
 import type { Request, Response } from "express";
+import { PrestamoModel } from "../models/prestamos.model.js";
 
-//GET PARA VER TODOS LOS PRESTAMOS
-/* export async function getPrestamos(req: Request, res: Response) {
-  try {
-    const result = await pool.query("SELECT * FROM prestamo;");
-    res.json({
-      message: "Conexion exitosa a la base de datos :D",
-      total: result.rowCount,
-      data: result.rows,
-    });
-  } catch (error) {
-    console.error("error al consultar PostgreSQL: ");
-    res.status(500).json({
-      message: "error al intentar conectar a la base de datos :c",
-    }) */ /* }
-}
- */
-
-//get para ver
+//get para ver toda la lista
 
 export async function getPrestamos(req: Request, res: Response) {
   try {
-    const { devuelto } = req.query;
-
-    let query = "SELECT * FROM prestamo";
-    const params: any[] = [];
-
-    if (devuelto !== undefined) {
-      if (devuelto !== "true" && devuelto !== "false") {
-        res.status(400).json({
-          error: "El parámetro devuelto debe ser true o false",
-        });
-        return;
-      }
-
-      query += " WHERE devuelto = $1";
-      params.push(devuelto === "true");
-    }
-
-    query += " ORDER BY id_prestamo";
-
-    const result = await pool.query(query, params);
-
-    res.json(result.rows);
-  } catch (error: any) {
+    const prestamos = await PrestamoModel.findAll();
+    res.json({ totalPrestamos: prestamos.length, data: prestamos });
+  } catch (error) {
+    console.error("error al consultar PostgreSQL: ");
     res.status(500).json({
-      error: error.message,
+      message: "error al intentar conectarse a la base de datos",
     });
+  }
+}
+
+// get para filtrar por true o false
+
+export async function getPrestamosByDevuelto(req: Request, res: Response) {
+  try {
+    const { devuelto } = req.query;
+    if (devuelto !== "true" && devuelto !== "false") {
+      res
+        .status(400)
+        .json({ error: "El parámetro devuelto debe ser true o false" });
+      return;
+    }
+    const prestamos = await PrestamoModel.findAllByDevuelto(
+      devuelto === "true",
+    );
+    res.json({ totalPrestamos: prestamos.length, data: prestamos });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
   }
 }
 
@@ -56,18 +40,15 @@ export async function getPrestamosById(req: Request, res: Response) {
   try {
     const id = Number(req.params.id);
     if (isNaN(id)) {
-      res.status(400).json({ error: "EL ID DEBE SER UN VALOR NUMERICO" });
+      res.status(400).json({ error: "el id debe ser numerico" });
       return;
     }
-    const resu = await pool.query(
-      "SELECT * FROM prestamo WHERE id_prestamo =$1",
-      [id],
-    );
-    if (resu.rows.length === 0) {
-      res.status(404).json({ error: "Prestamo no encontrado" });
+    const prestamo = await PrestamoModel.findById(id);
+    if (!prestamo) {
+      res.status(400).json({ error: "prestamo no encontrado" });
       return;
     }
-    res.json(resu.rows[0]);
+    res.json({ data: prestamo });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -78,39 +59,19 @@ export async function postPrestamo(req: Request, res: Response) {
   try {
     const { fecha_prestamo, fecha_devolucion, devuelto, id_socio, id_libro } =
       req.body;
-
     if (!fecha_prestamo || devuelto === undefined || !id_socio || !id_libro) {
-      res.status(400).json({
-        error: "faltan datos obligatorios",
-      });
-      return;
+      res.status(400).json({ error: "faltan datos obligatorios" });
     }
-
-    const query = `
-      INSERT INTO prestamo (
-        fecha_prestamo,
-        fecha_devolucion,
-        devuelto,
-        id_socio,
-        id_libro
-      )
-      VALUES ($1, $2, $3, $4, $5)
-      RETURNING *;
-    `;
-
-    const result = await pool.query(query, [
+    const newPrestamo = await PrestamoModel.create({
       fecha_prestamo,
-      fecha_devolucion || null,
+      fecha_devolucion,
       devuelto,
       id_socio,
       id_libro,
-    ]);
-
-    res.status(201).json(result.rows[0]);
-  } catch (error: any) {
-    res.status(500).json({
-      error: error.message,
     });
+    res.status(201).json({ data: newPrestamo });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
   }
 }
 
@@ -119,50 +80,17 @@ export async function postPrestamo(req: Request, res: Response) {
 export async function putPrestamo(req: Request, res: Response) {
   try {
     const id = Number(req.params.id);
-
     if (isNaN(id)) {
-      res.status(400).json({
-        error: "EL ID DEBE SER UN VALOR NUMERICO",
-      });
+      res.status(400).json({ error: "EL ID DEBE SER UN VALOR NUMERICO" });
+    }
+    const prestamoUpdate = await PrestamoModel.update(id, { devuelto: true });
+    if (!prestamoUpdate) {
+      res.status(404).json({ error: "prestamo no encontrado" });
       return;
     }
-
-    const { fecha_devolucion, devuelto } = req.body;
-
-    if (devuelto === undefined) {
-      res.status(400).json({
-        error: "El campo devuelto es obligatorio",
-      });
-      return;
-    }
-
-    const query = `
-      UPDATE prestamo
-      SET
-        fecha_devolucion = $1,
-        devuelto = $2
-      WHERE id_prestamo = $3
-      RETURNING *;
-    `;
-
-    const result = await pool.query(query, [
-      fecha_devolucion || null,
-      devuelto,
-      id,
-    ]);
-
-    if (result.rows.length === 0) {
-      res.status(404).json({
-        error: "Prestamo no encontrado",
-      });
-      return;
-    }
-
-    res.json(result.rows[0]);
+    res.json({ data: prestamoUpdate });
   } catch (error: any) {
-    res.status(500).json({
-      error: error.message,
-    });
+    res.status(500).json({ error: error.message });
   }
 }
 
@@ -171,32 +99,16 @@ export async function putPrestamo(req: Request, res: Response) {
 export async function deletePrestamo(req: Request, res: Response) {
   try {
     const id = Number(req.params.id);
-
     if (isNaN(id)) {
-      res.status(400).json({
-        error: "EL ID DEBE SER UN VALOR NUMERICO",
-      });
-      return;
+      res.status(400).json({ error: "EL ID DEBE SER UN VALOR NUMERICO" });
     }
-
-    const query = "DELETE FROM prestamo WHERE id_prestamo = $1 RETURNING *;";
-
-    const result = await pool.query(query, [id]);
-
-    if (result.rows.length === 0) {
-      res.status(404).json({
-        error: "Prestamo no encontrado",
-      });
-      return;
+    const prestamoEliminado = await PrestamoModel.delete(id);
+    if (prestamoEliminado) {
+      res.status(200).json({ message: "prestamo eliminado exitosamente" });
+    } else {
+      res.status(404).json({ message: "prestamo no encontrado" });
     }
-
-    res.json({
-      message: "Prestamo eliminado correctamente",
-      data: result.rows[0],
-    });
   } catch (error: any) {
-    res.status(500).json({
-      error: error.message,
-    });
+    res.status(500).json({ error: error.message });
   }
 }
