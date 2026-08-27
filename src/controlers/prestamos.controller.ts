@@ -1,42 +1,40 @@
 import type { Request, Response } from "express";
 import { PrestamoModel } from "../models/prestamos.model.js";
-
+import {
+  createPrestamoSchema,
+  updatePrestamoSchema,
+} from "../schemas/prestamos.schema.js";
 //get para ver toda la lista
 
 export async function getPrestamos(req: Request, res: Response) {
-  try {
-    const prestamos = await PrestamoModel.findAll();
-    res.json({ totalPrestamos: prestamos.length, data: prestamos });
-  } catch (error) {
-    console.error("error al consultar PostgreSQL: ");
-    res.status(500).json({
-      message: "error al intentar conectarse a la base de datos",
-    });
-  }
-}
-
-// get para filtrar por true o false
-
-export async function getPrestamosByDevuelto(req: Request, res: Response) {
+  /*
+  #swagger.tags = ['Prestamo']
+  #swagger.summary = 'Obtener todos los préstamos y filtrar por estado de devolución'
+  */
   try {
     const { devuelto } = req.query;
-    if (devuelto !== "true" && devuelto !== "false") {
-      res
-        .status(400)
-        .json({ error: "El parámetro devuelto debe ser true o false" });
+    if (devuelto !== undefined && devuelto !== "true" && devuelto !== "false") {
+      res.status(400).json({
+        error: "El parámetro devuelto debe ser true o false",
+      });
       return;
     }
-    const prestamos = await PrestamoModel.findAllByDevuelto(
-      devuelto === "true",
-    );
+    const filtroDevuelto =
+      devuelto === undefined ? undefined : devuelto === "true";
+    const prestamos = await PrestamoModel.findAll(filtroDevuelto);
     res.json({ totalPrestamos: prestamos.length, data: prestamos });
   } catch (error: any) {
+    console.error("Error al consultar PostgreSQL:", error);
     res.status(500).json({ error: error.message });
   }
 }
 
 //GET PARA VER UN PRESTAMOS POR SU ID
 export async function getPrestamosById(req: Request, res: Response) {
+  /*  
+  #swagger.tags = ['Prestamo']
+  #swagger.summary = 'Obtener y filtrar un registro de Prestamo de la biblioteca por su ID'
+  */
   try {
     const id = Number(req.params.id);
     if (isNaN(id)) {
@@ -56,19 +54,21 @@ export async function getPrestamosById(req: Request, res: Response) {
 
 //POST PARA CREAR UN PRESTAMO
 export async function postPrestamo(req: Request, res: Response) {
+  /*
+  #swagger.tags = ['Prestamo']
+  #swagger.summary = 'Crear un nuevo registro de Prestamo de la biblioteca'
+  */
+
   try {
-    const { fecha_prestamo, fecha_devolucion, devuelto, id_socio, id_libro } =
-      req.body;
-    if (!fecha_prestamo || devuelto === undefined || !id_socio || !id_libro) {
-      res.status(400).json({ error: "faltan datos obligatorios" });
+    const result = createPrestamoSchema.safeParse(req.body);
+    console.log(result);
+
+    if (!result.success) {
+      return res.status(400).json({ error: result.error.issues });
     }
-    const newPrestamo = await PrestamoModel.create({
-      fecha_prestamo,
-      fecha_devolucion,
-      devuelto,
-      id_socio,
-      id_libro,
-    });
+
+    const newPrestamo = await PrestamoModel.create(result.data);
+
     res.status(201).json({ data: newPrestamo });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -78,16 +78,37 @@ export async function postPrestamo(req: Request, res: Response) {
 //put para actualizar
 
 export async function putPrestamo(req: Request, res: Response) {
+  /*
+  #swagger.tags = ['Prestamo']
+  #swagger.summary = 'Actualizar un registro de Prestamo de la biblioteca por su ID'
+  */
+
   try {
     const id = Number(req.params.id);
+
     if (isNaN(id)) {
-      res.status(400).json({ error: "EL ID DEBE SER UN VALOR NUMERICO" });
-    }
-    const prestamoUpdate = await PrestamoModel.update(id, { devuelto: true });
-    if (!prestamoUpdate) {
-      res.status(404).json({ error: "prestamo no encontrado" });
+      res.status(400).json({
+        error: "EL ID DEBE SER UN VALOR NUMERICO",
+      });
       return;
     }
+
+    const result = updatePrestamoSchema.safeParse(req.body);
+
+    if (!result.success) {
+      res.status(400).json({ error: result.error.issues });
+      return;
+    }
+
+    const prestamoUpdate = await PrestamoModel.update(id, result.data);
+
+    if (!prestamoUpdate) {
+      res.status(404).json({
+        error: "prestamo no encontrado",
+      });
+      return;
+    }
+
     res.json({ data: prestamoUpdate });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -97,6 +118,10 @@ export async function putPrestamo(req: Request, res: Response) {
 // delete para eliminar
 
 export async function deletePrestamo(req: Request, res: Response) {
+  /*  
+  #swagger.tags = ['Prestamo']
+  #swagger.summary = 'Eliminar un registro de Prestamo de la biblioteca por su ID'
+  */
   try {
     const id = Number(req.params.id);
     if (isNaN(id)) {

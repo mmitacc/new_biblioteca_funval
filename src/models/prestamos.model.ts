@@ -1,8 +1,5 @@
-import { create } from "node:domain";
 import { pool } from "../config/db.js";
-
 //tipado de la tabla
-
 export interface Prestamo {
   id_prestamo: number;
   fecha_prestamo: string;
@@ -19,19 +16,20 @@ export type UpdatePrestamoInput = Partial<CreatePrestamoInput>;
 //funciones de consulta del biblioteca_db
 
 export const PrestamoModel = {
-  findAll: async (): Promise<Prestamo[]> => {
-    const { rows } = await pool.query(
-      "SELECT * FROM prestamo ORDER BY id_prestamo ASC;",
-    );
-    return rows;
-  },
-  findAllByDevuelto: async (devuelto: boolean): Promise<Prestamo[]> => {
+  findAll: async (devuelto?: boolean): Promise<Prestamo[]> => {
+    if (devuelto === undefined) {
+      const { rows } = await pool.query(
+        "SELECT * FROM prestamo ORDER BY id_prestamo ASC;",
+      );
+      return rows;
+    }
     const { rows } = await pool.query(
       "SELECT * FROM prestamo WHERE devuelto = $1 ORDER BY id_prestamo ASC;",
       [devuelto],
     );
     return rows;
   },
+
   findById: async (id: number): Promise<Prestamo | null> => {
     const { rows } = await pool.query(
       "SELECT * FROM prestamo WHERE id_prestamo = $1;",

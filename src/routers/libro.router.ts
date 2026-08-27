@@ -1,5 +1,11 @@
 import { Router } from "express";
-import { getLibrosAll, getLibroId, postLibro, putLibroId, deleteLibroId } from "../controlers/libro.controller.js";
+import {
+  getLibrosAll,
+  getLibroId,
+  postLibro,
+  putLibroId,
+  deleteLibroId,
+} from "../controlers/libro.controller.js";
 
 const router: Router = Router();
 
