@@ -47,7 +47,7 @@ app.get("/", function (req: Request, res: Response) {
   });
 });
 
-console.clear();
+// console.clear();
 app.listen(PORT, async function () {
   console.log("servidor corriendo en http://localhost" + PORT);
   try {
