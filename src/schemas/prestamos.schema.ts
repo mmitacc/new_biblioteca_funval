@@ -14,6 +14,15 @@ export const createPrestamoSchema = z.object({
     .number({ message: "El id del libro debe ser obligatorio" })
     .positive("El id del libro debe ser mayor a 0"),
 });
+
+export interface prestamoQueryParams {
+  page?: string;
+  limit?: string;
+  devuelto?: string;
+  id_socio?: string;
+  id_libro?: string;
+}
+
 export const updatePrestamoSchema = z.object({
   devuelto: z.boolean({ message: "El campo devuelto debe ser obligatorio" }),
 });

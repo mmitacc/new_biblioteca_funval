@@ -5,7 +5,7 @@ import {
   postPrestamo,
   putPrestamo,
   deletePrestamo,
-} from "../controlers/prestamos.controller.js";
+} from "../controllers/prestamos.controller.js";
 
 const router = Router();
 /* el metodo get prestamos para todos los registros  */
