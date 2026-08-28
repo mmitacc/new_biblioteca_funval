@@ -1,5 +1,17 @@
 import { Router } from "express";
-import { getLibrosAll, getLibroId, postLibro, putLibroId, deleteLibroId } from "../controlers/libro.controller.js";
+import {
+  getLibrosAll,
+  getLibroId,
+  postLibro,
+  putLibroId,
+  deleteLibroId,
+} from "../controlers/libro.controller.js";
+import idParamSchema from "../schemas/idParamSchema.js";
+import {
+  validarBodySchema,
+  validarParamSchema,
+} from "../middlewares/libro.middleware.js";
+import { libroBodySchema, libroQuerySchema } from "../schemas/libro.shema.js";
 
 const router: Router = Router();
 
@@ -7,15 +19,20 @@ const router: Router = Router();
 router.get("/", getLibrosAll);
 
 /* el metodo get libros por el id  */
-router.get("/:id", getLibroId);
+router.get("/:id", validarParamSchema(idParamSchema), getLibroId);
 
 /* el metodo post libros para registrar un nuevo libro */
-router.post("/", postLibro);
+router.post("/", validarBodySchema(libroBodySchema), postLibro);
 
 /* el metodo put libros por el id  */
-router.put("/:id", putLibroId);
+router.put(
+  "/:id",
+  validarParamSchema(idParamSchema),
+  validarBodySchema(libroQuerySchema),
+  putLibroId,
+);
 
 /* el metodo delete libros por el id  */
-router.delete("/:id", deleteLibroId);
+router.delete("/:id", validarParamSchema(idParamSchema), deleteLibroId);
 
 export default router;
